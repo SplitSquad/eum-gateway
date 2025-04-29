@@ -19,10 +19,6 @@ server:
 
 # 유레카 서버의 서비스 정보 페이지 등록
 eureka:
-  instance:
-    prefer-ip-address: true
-    ip-address: 127.0.0.1
-    hostname: localhost
   client:
     service-url:
       # 현재는 미구현 상태로 404임
