@@ -48,7 +48,7 @@ public class JwtFilterConfig implements WebFilter {
         }
 
         if (jwtUtil.isExpired(token)) {
-            return setErrorResponse(exchange, HttpStatus.UNAUTHORIZED, "만료된 토큰입니다.");
+            return setErrorResponse(exchange, HttpStatus.UNAUTHORIZED, "만료된 access 토큰");
         }
 
         UsernamePasswordAuthenticationToken authentication =
