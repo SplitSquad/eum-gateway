@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .cors(withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange(exchange -> exchange
-                        .pathMatchers("/auth/url", "/auth/login","/auth/refresh").permitAll()
+                        .pathMatchers("/auth/url", "/auth/login","/auth/refresh", "/login").permitAll()
                         .anyExchange().authenticated()
                 )
                 .addFilterAt(jwtFilter, org.springframework.security.config.web.server.SecurityWebFiltersOrder.AUTHENTICATION)
