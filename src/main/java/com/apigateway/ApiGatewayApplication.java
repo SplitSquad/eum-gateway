@@ -22,6 +22,10 @@ public class ApiGatewayApplication {
                 // 개별 라우트 등록
                 // 서비스별 URL 별칭이 1개인 경우, n개인 경우도 존재
                 .route("user",
+                        r -> r.path("/login").uri("lb://community")) //test
+
+            
+                .route("user",
                         r -> r.path("/auth/**").uri("lb://user"))
                 .route("user",
                 r -> r.path("/users/**").uri("lb://user"))
