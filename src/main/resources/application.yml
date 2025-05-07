@@ -32,3 +32,5 @@ logging:
     com.example.apigateway.config.com.apigateway.config.JwtFilterConfig: DEBUG
     org.springframework.web.reactive.function.client.ExchangeFunctions: DEBUG
     org.springframework.web.reactive.function.client.ExchangeFilterFunction: DEBUG
+debate:
+  secret: ${DEBATE_SECRET}
