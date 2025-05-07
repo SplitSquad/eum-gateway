@@ -4,6 +4,7 @@ import com.apigateway.entity.UserEntity;
 import com.apigateway.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -17,21 +18,42 @@ import reactor.core.publisher.Mono;
 import util.JwtUtil;
 
 import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtFilterConfig implements WebFilter {
 
+    @Value("${debate.secret}")
+    private String secret;
+
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+
+
+    private static final List<String> WHITELIST = List.of(
+            "/auth/url",
+            "/auth/login",
+            "/auth/refresh"
+    );
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 
+        String path = exchange.getRequest().getURI().getPath();
+        if (WHITELIST.stream().anyMatch(path::startsWith)) {
+            return chain.filter(exchange);
+        }
+
+        String debateHeader = exchange.getRequest().getHeaders().getFirst("Debate"); //토론 작성글은 통과
+        if(secret.equals(debateHeader)) {
+            return chain.filter(exchange);
+        }
+
         String token = exchange.getRequest().getHeaders().getFirst("Authorization");
-        if (token == null) {
-            return chain.filter(exchange); // 토큰이 없으면 그냥 통과
+        if (token == null) { // 토큰 없으면
+            return setErrorResponse(exchange, HttpStatus.UNAUTHORIZED, "AccessToken이 필요합니다.");
         }
 
         Long userid;
