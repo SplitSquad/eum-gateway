@@ -19,7 +19,7 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICE-URL_DEFAULTZONE}
+      defaultZone: ${EUREKA_IP}
 front-ip: ${FRONT_IP}
 jwt:
   token:
