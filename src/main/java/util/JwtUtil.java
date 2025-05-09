@@ -15,12 +15,6 @@ public class JwtUtil {
 
     private SecretKey secretKey;
 
-    @Value("${jwt.access-token-expiration}")
-    private long accessExpiration;
-
-    @Value("${jwt.refresh-token-expiration}")
-    private long refreshExpiration;
-
     public JwtUtil(@Value("${jwt.token.secret}") String secret) {
         secretKey = new SecretKeySpec(
                 secret.getBytes(StandardCharsets.UTF_8),
@@ -35,13 +29,6 @@ public class JwtUtil {
                 .get("userId",  Long.class);
     }
 
-    public String getRole(String token) {
-        return Jwts.parser().verifyWith(secretKey).build()
-                .parseClaimsJws(token)
-                .getPayload()
-                .get("role", String.class);
-    }
-
     public Boolean isExpired(String token) {
         try {
             Date exp = Jwts.parser().verifyWith(secretKey).build()
@@ -52,15 +39,5 @@ public class JwtUtil {
         } catch (ExpiredJwtException e) {
             return true;
         }
-    }
-
-    public String generateToken(Long userId, String role, long expiration) {
-        return Jwts.builder()
-                .claim("userId", userId)
-                .claim("role", role)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(secretKey)
-                .compact();
     }
 }
