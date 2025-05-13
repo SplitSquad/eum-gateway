@@ -25,20 +25,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtFilterConfig implements WebFilter {
 
-    private final WebClient webClient;
     @Value("${debate.secret}")
     private String secret;
-
-    @Value("${gateway.url}")
-    private String gatewayUrl;
 
     private final JwtUtil jwtUtil;
 
     private static final List<String> WHITELIST = List.of(
             "/auth/url",
             "/auth/login",
-            "/auth/refresh",
-            "/auth"
+            "/auth/refresh"
     );
 
     @Override
@@ -51,7 +46,20 @@ public class JwtFilterConfig implements WebFilter {
 
         String debateHeader = exchange.getRequest().getHeaders().getFirst("Debate"); //토론 작성글은 통과
         if(secret.equals(debateHeader)) {
-            return chain.filter(exchange);
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            "debate-system", // principal
+                            null,
+                            Collections.singleton(() -> "ROLE_DEBATE") // 권한
+                    );
+
+            return chain.filter(
+                    exchange.mutate()
+                            .request(exchange.getRequest().mutate()
+                                    .header("X-Auth-User", "debate-system")
+                                    .build())
+                            .build()
+            ).contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
         }
 
         String token = exchange.getRequest().getHeaders().getFirst("Authorization");
@@ -59,10 +67,8 @@ public class JwtFilterConfig implements WebFilter {
             return setErrorResponse(exchange, HttpStatus.UNAUTHORIZED, "AccessToken이 필요합니다.");
         }
 
-        Long userid;
         String email, role;
         try {
-            userid = jwtUtil.getUserid(token);
             email = jwtUtil.getEmail(token);
             role = jwtUtil.getRole(token);
         } catch (Exception e) {
