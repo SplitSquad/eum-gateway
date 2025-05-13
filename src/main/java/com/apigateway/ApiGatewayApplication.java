@@ -41,6 +41,7 @@ public class ApiGatewayApplication {
                         r -> r.path("/sse/**").uri("lb://alarm"))
                 .route("log",
                         r -> r.path("/logs/**").uri("lb://log"))
+            
                 .build();
     }
 }
