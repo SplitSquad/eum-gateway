@@ -1,0 +1,34 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  application:
+    name: api-gateway
+
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST}
+      port: ${SPRING_REDIS_PORT}
+# 게이트웨이 담당, 모든 유저(혹은 프런트엔드)는 이 포트로 접속 -> 8080
+server:
+  port: 8080
+# 유레카 서버의 서비스 정보 페이지 등록
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE-URL_DEFAULTZONE}
+front-ip: ${FRONT_IP}
+jwt:
+  token:
+    secret: ${JWT_SECRET}
+
+logging:
+  level:
+    root: INFO
+    com.example.apigateway.config.com.apigateway.config.JwtFilterConfig: DEBUG
+    org.springframework.web.reactive.function.client.ExchangeFunctions: DEBUG
+    org.springframework.web.reactive.function.client.ExchangeFilterFunction: DEBUG
+debate:
+  secret: ${DEBATE_SECRET}
+
+gateway:
+  url: ${GATEWAY_URL}
