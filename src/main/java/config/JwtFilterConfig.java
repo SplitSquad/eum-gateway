@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -58,35 +59,33 @@ public class JwtFilterConfig implements WebFilter {
             return setErrorResponse(exchange, HttpStatus.UNAUTHORIZED, "AccessToken이 필요합니다.");
         }
 
-        UserRes user;
-        try{
-            user = webClient.get()
-                    .uri(gatewayUrl + "?token=" + token)
-                    .retrieve()
-                    .bodyToMono(UserRes.class)
-                    .block();
-        }catch(WebClientException e){
-            return setErrorResponse(exchange, HttpStatus.UNAUTHORIZED, "사용자 계정이 존재하지 않습니다.");
-        }
+        return webClient.get()
+                .uri(gatewayUrl + "?token=" + token)
+                .retrieve()
+                .bodyToMono(UserRes.class)
+                .flatMap(user -> {
 
-        if (jwtUtil.isExpired(token)) {
-            return setErrorResponse(exchange, HttpStatus.UNAUTHORIZED, "만료된 access 토큰");
-        }
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    user.getEmail(),
+                                    null,
+                                    Collections.singleton(() -> user.getRole())
+                            );
 
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(
-                        user.getEmail(),
-                        null,
-                        Collections.singleton(() -> user.getRole())
-                );
+                    ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
+                            .header("X-Auth-User", user.getEmail())
+                            .build();
 
-        return chain.filter(
-                exchange.mutate()
-                        .request(exchange.getRequest().mutate()
-                                .header("X-Auth-User", user.getEmail())
-                                .build())
-                        .build()
-        ).contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
+                    ServerWebExchange mutatedExchange = exchange.mutate()
+                            .request(mutatedRequest)
+                            .build();
+
+                    return chain.filter(mutatedExchange)
+                            .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
+                })
+                .onErrorResume(WebClientException.class, e -> {
+                    return setErrorResponse(exchange, HttpStatus.UNAUTHORIZED, "사용자 계정이 존재하지 않습니다.");
+                });
     }
 
     private Mono<Void> setErrorResponse(ServerWebExchange exchange, HttpStatus status, String message) {
