@@ -59,33 +59,35 @@ public class JwtFilterConfig implements WebFilter {
             return setErrorResponse(exchange, HttpStatus.UNAUTHORIZED, "AccessToken이 필요합니다.");
         }
 
-        return webClient.get()
-                .uri(gatewayUrl + "?token=" + token)
-                .retrieve()
-                .bodyToMono(UserRes.class)
-                .flatMap(user -> {
+        Long userid;
+        String email, role;
+        try {
+            userid = jwtUtil.getUserid(token);
+            email = jwtUtil.getEmail(token);
+            role = jwtUtil.getRole(token);
+        } catch (Exception e) {
+            return setErrorResponse(exchange, HttpStatus.UNAUTHORIZED, "잘못된 토큰입니다.");
+        }
 
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(
-                                    user.getEmail(),
-                                    null,
-                                    Collections.singleton(() -> user.getRole())
-                            );
 
-                    ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
-                            .header("X-Auth-User", user.getEmail())
-                            .build();
+        if (jwtUtil.isExpired(token)) {
+            return setErrorResponse(exchange, HttpStatus.UNAUTHORIZED, "만료된 access 토큰");
+        }
 
-                    ServerWebExchange mutatedExchange = exchange.mutate()
-                            .request(mutatedRequest)
-                            .build();
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(
+                        email,
+                        null,
+                        Collections.singleton(() -> role)
+                );
 
-                    return chain.filter(mutatedExchange)
-                            .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
-                })
-                .onErrorResume(WebClientException.class, e -> {
-                    return setErrorResponse(exchange, HttpStatus.UNAUTHORIZED, "사용자 계정이 존재하지 않습니다.");
-                });
+        return chain.filter(
+                exchange.mutate()
+                        .request(exchange.getRequest().mutate()
+                                .header("X-Auth-User", email)
+                                .build())
+                        .build()
+        ).contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
     }
 
     private Mono<Void> setErrorResponse(ServerWebExchange exchange, HttpStatus status, String message) {

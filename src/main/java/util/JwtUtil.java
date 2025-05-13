@@ -29,6 +29,16 @@ public class JwtUtil {
                 .get("userId",  Long.class);
     }
 
+    public String getRole(String token) {
+        return Jwts.parser().verifyWith(secretKey).build()
+                .parseClaimsJws(token).getPayload().get("role", String.class);
+    }
+
+    public String getEmail(String token) {
+        return Jwts.parser().verifyWith(secretKey).build()
+                .parseClaimsJws(token).getPayload().get("email", String.class);
+    }
+
     public Boolean isExpired(String token) {
         try {
             Date exp = Jwts.parser().verifyWith(secretKey).build()
