@@ -23,6 +23,7 @@ public class ApiGatewayApplication {
                 // 서비스별 URL 별칭이 1개인 경우, n개인 경우도 존재
                 .route("user",
                         r -> r.path("/login").uri("lb://community")) //test
+
             
                 .route("user",
                         r -> r.path("/auth/**").uri("lb://user"))
@@ -41,8 +42,8 @@ public class ApiGatewayApplication {
                 .route("log",
                         r -> r.path("/logs/**").uri("lb://log"))
 
-                .route("chatbot",
-                        r -> r.path("/api/v1/chatbot").uri("lb://chatbot"))
+                .route("eum-chatbot",
+                        r -> r.path("/api/v1/chatbot").uri("lb://eum-chatbot"))
                 .build();
     }
 }
