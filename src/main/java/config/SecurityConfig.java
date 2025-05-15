@@ -18,7 +18,9 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     private final JwtFilterConfig jwtFilter;
-
+    
+    @Value("${front-ip}")
+    private String frontIp;
     @Bean
     public SecurityWebFilterChain filterChain(ServerHttpSecurity http) {
         return http
@@ -36,6 +38,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("http://localhost:3000"); // 허용할 프론트엔드 URL
+        configuration.addAllowedOrigin(frontIp); // 허용할 프론트엔드 URL
         configuration.addAllowedMethod("*"); // 모든 HTTP 메서드 허용
         configuration.addAllowedHeader("*"); // 모든 헤더 허용
         configuration.addExposedHeader("Authorization");
