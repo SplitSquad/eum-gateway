@@ -44,8 +44,8 @@ public class ApiGatewayApplication {
 
                 .route("EUM-CHATBOT",
                         r -> r.path("/api/v1/chatbot").uri("lb://EUM-CHATBOT"))
-                .route("DISCUSSION-ROOM",
-                        r -> r.path("/api/v1/discussion").uri("lb://DISCUSSION-ROOM"))
+                .route("discussion-room",
+                        r -> r.path("/api/v1/discussion").uri("lb://discussion-room"))
                 .route("classifier", 
                         r -> r.path("/user/**").uri("lb://classifier"))
                 .build();
