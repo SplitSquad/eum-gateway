@@ -30,6 +30,8 @@ public class ApiGatewayApplication {
                 .route("user",
                 r -> r.path("/users/**").uri("lb://user"))
                 .route("user",
+                r -> r.path("/admin/**").uri("lb://user"))
+                .route("user",
                         r -> r.path("/calendar/**").uri("lb://user"))
                 .route("post",
                         r -> r.path("/community/**").uri("lb://community"))
