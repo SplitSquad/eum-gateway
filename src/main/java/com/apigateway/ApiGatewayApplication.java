@@ -43,8 +43,8 @@ public class ApiGatewayApplication {
                         r -> r.path("/sse/**").uri("lb://alarm"))
                 .route("log",
                         r -> r.path("/logs/**").uri("lb://log"))
-                .route("eum-information", 
-                        r -> r.path("/information/**").uri("lb://eum-information"))
+                .route("information", 
+                        r -> r.path("/information/**").uri("lb://information"))
 
                 .route("EUM-CHATBOT",
                         r -> r.path("/api/v1/chatbot").uri("lb://EUM-CHATBOT"))
