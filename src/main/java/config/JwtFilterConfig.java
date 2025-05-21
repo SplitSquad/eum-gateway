@@ -33,7 +33,9 @@ public class JwtFilterConfig implements WebFilter {
     private static final List<String> WHITELIST = List.of(
             "/auth/url",
             "/auth/login",
-            "/auth/refresh"
+            "/auth/refresh",
+        "/auth/common/join",
+        "/auth/common/login"
     );
 
     @Override
