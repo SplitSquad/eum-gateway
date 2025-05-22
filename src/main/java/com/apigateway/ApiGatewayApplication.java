@@ -45,6 +45,8 @@ public class ApiGatewayApplication {
                         r -> r.path("/logs/**").uri("lb://log"))
                 .route("information", 
                         r -> r.path("/information/**").uri("lb://information"))
+                .route("agentic",
+                        r -> r.path("/api/v1/agentic").uri("lb://agentic"))
 
                 .route("EUM-CHATBOT",
                         r -> r.path("/api/v1/chatbot").uri("lb://EUM-CHATBOT"))
