@@ -2,7 +2,7 @@ name: Gateway CI to ECR
 on:
   push:
     branches:
-      - main
+      - temp
     paths:
       - '**'
   workflow_dispatch:
